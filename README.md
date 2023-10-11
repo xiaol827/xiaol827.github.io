@@ -1,1 +1,1 @@
-Cloned from [Jon Barron](https://jonbarron.info/)
+Cloned from Jon Barron's [website](https://jonbarron.info/).
