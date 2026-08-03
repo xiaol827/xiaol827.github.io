@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Taylor series and optimization — Xiaolong Huang</title>
+    <meta name="author" content="Xiaolong Huang">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    <link rel="icon" type="image/png" href="../images/h-favicon-32.png">
+
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+      onload="renderMathInElement(document.body,{delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'\\[',right:'\\]',display:true},
+        {left:'\\(',right:'\\)',display:false},
+        {left:'$',right:'$',display:false}]});"></script>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <nav>
+        <a class="brand" href="../index.html">Xiaolong Huang</a>
+        <div class="navlinks">
+          <a href="../index.html">Home</a>
+          <a href="../index.html#papers">Papers</a>
+          <a href="../blog.html" class="active">Blog</a>
+          <!-- <a href="../beyond-research.html">Beyond Research</a> -->
+        </div>
+      </nav>
+
+      <div class="page">
+        <div class="post-header">
+          <span class="post-meta">Xiaolong Huang - 4/6/26</span>
+          <h1 class="post-title">Taylor series and optimization</h1>
+        </div>
+
+        <div class="post-body">
+          <p class="lead">Nearly every optimizer we use in deep learning, from plain SGD to Newton-style methods, is built on the same idea: construct a local polynomial approximation of the loss and derive an update from that approximation. I write this quick note to briefly review Taylor series and how it connects to optimization. </p>
+
+          <h3>1. The Taylor series: Approximating a function with a polynomial</h3>
+
+          <p>Complicated functions are hard to reason about, but polynomials are easy. The Taylor
+            expansion is the bridge between the two. Suppose \(f(x)\) is smooth (its
+            derivatives exist to every order we need). Then near \(a\), the function can be well approximated by a
+            polynomial built from exactly that local information:</p>
+
+          \[
+          f(x) = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2
+                 + \cdots + \frac{f^{(n)}(a)}{n!}(x-a)^n + R_n(x),
+          \]
+
+          <p>where the remainder \(R_n(x)\) collects everything the first \(n\) terms miss.
+            Each extra term adds one more piece of local structure.</p>
+
+          <figure>
+            <img src="../images/taylor-orders.png"
+                 alt="A curve with its zeroth-order (constant), first-order (tangent line) and second-order (quadratic) Taylor approximations at a point a">
+            <figcaption>A simple illustration of Taylor approximations.</figcaption>
+          </figure>
+
+          <p>Where do the coefficients \(\frac{f^{(k)}(a)}{k!}\) come from? Let's start with a polynomial centered at
+          \(x=a\):</p>
+
+          \[
+          P(x)=c_0+c_1(x-a)+c_2(x-a)^2+\cdots.
+          \]
+
+          <p>Then choose the coefficients so that \(P(x)\) matches \(f(x)\) at \(a\), both in value
+          and in its every-order derivatives.</p>
+
+          <ul>
+            <li>matching values: \(P(a) = c_0\), so \(c_0 = f(a)\);</li>
+            <li>matching slopes: \(P'(x) = c_1 + 2c_2(x-a) + \cdots\), so \(c_1 = f'(a)\);</li>
+            <li>matching curvature: \(P''(x) = 2c_2 + \cdots\), so \(c_2 = \frac{f''(a)}{2}\).</li>
+            <li> ... </li>
+          </ul>
+
+          In general,
+          </p>
+
+          \[
+          c_k=\frac{f^{(k)}(a)}{k!}.
+          \]
+
+          <p>
+            This gives the \(n\)-th order Taylor approximation:
+          </p>
+
+          \[
+          f(x)
+          =
+          \sum_{k=0}^{n}
+          \frac{f^{(k)}(a)}{k!}(x-a)^k
+          +
+          R_n(x).
+          \]
+
+          <p>
+            If \(R_n(x)\to 0\) as \(n\to\infty\), the approximation becomes exact and
+            gives the Taylor series:
+          </p>
+
+          \[
+          f(x)
+          =
+          \sum_{k=0}^{\infty}
+          \frac{f^{(k)}(a)}{k!}(x-a)^k.
+          \]
+
+          <p>(The special case \(a = 0\) is the Maclaurin series:
+            \(f(x) = \sum_{k=0}^{\infty} \frac{f^{(k)}(0)}{k!}x^k\).)</p>
+
+          <p>
+            Note that the Taylor series may diverge or converge to something other than
+            \(f(x)\). A classic example is \(f(x)\)=\(e^{-1/x^2}\), all of whose derivatives vanish at \(0\), so its series at \(0\)
+            is identically zero, even though the function itself is not. Functions whose Taylor series converges to \(f(x)\) in a neighborhood of \(a\)
+            are called real analytic at \(a\).
+          </p>
+
+
+          <h3>2. The loss through a Taylor lens</h3>
+
+          <p>Training a neural network can be seen as a minimization problem:</p>
+
+          \[ \min_\theta L(\theta), \]
+
+          <p>where \(\theta\) is the neural network parameters, possibly at a scale of millions or billions.
+            An optimizer keeps asking one question: <em>if I nudge the parameters by
+            \(\Delta\theta\), what happens to the loss?</em> That is precisely a question
+            about \(L(\theta + \Delta\theta)\), and the Taylor expansion answers
+            it:</p>
+
+          \[
+          L(\theta + \Delta\theta) \approx L(\theta)
+            + \nabla L(\theta)^\top \Delta\theta
+            + \tfrac{1}{2}\,\Delta\theta^\top H(\theta)\,\Delta\theta.
+          \]
+
+          <p>The three components extend the same intuition from the one-dimensional case: the gradient
+            \(\nabla L(\theta)\) is the local slope, the Hessian \(H(\theta)\) is the local
+            curvature, and \(\Delta\theta\) is the step we are about to take. An optimizer is
+            defined by how much of this expansion it keeps.</p>
+
+          <h3>3. SGD: act on the first-order term</h3>
+
+          <p>Keep only the linear part:</p>
+
+          \[ L(\theta + \Delta\theta) \approx L(\theta) + \nabla L(\theta)^\top \Delta\theta. \]
+
+          <p>To make the loss go down we need \(\nabla L(\theta)^\top \Delta\theta < 0\), a natural choice is to take</p>
+
+          \[ \Delta\theta = -\eta\,\nabla L(\theta) \]
+
+          <p>with a small step size \(\eta > 0\) and substituting back:</p>
+
+          \[
+          \nabla L(\theta)^\top\!\left(-\eta\,\nabla L(\theta)\right)
+            = -\eta\,\lVert \nabla L(\theta) \rVert^2 \le 0,
+          \]
+
+          <p>so the linear model guarantees descent. This is exactly gradient descent, and
+            with mini-batch gradients, SGD:</p>
+
+          \[ \theta_{t+1} = \theta_t - \eta\,\nabla L(\theta_t). \]
+
+          <h3>4. Newton's method: act on the second-order term</h3>
+
+          <p>Keep the quadratic term too, and instead of merely picking a direction, minimize
+            the model itself over \(\Delta\):</p>
+
+          \[
+          L(\theta + \Delta) \approx L(\theta)
+            + \nabla L(\theta)^\top \Delta
+            + \tfrac{1}{2}\,\Delta^\top H \Delta.
+          \]
+
+          <p>Setting the derivative with respect to \(\Delta\) to zero,</p>
+
+          \[
+          \nabla L(\theta) + H\Delta = 0
+          \;\Rightarrow\;
+          \Delta = -H^{-1}\nabla L(\theta),
+          \]
+
+          <p>which gives the Newton update:</p>
+
+          \[ \theta_{t+1} = \theta_t - H^{-1}\nabla L(\theta_t). \]
+
+          <p>The contrast with SGD is sharp. Because the quadratic model has a minimum, Newton's
+            method needs no external step size: the curvature sets both the direction and the
+            scale, rescaling each coordinate by how sharply the loss bends there. However, the catch is
+            cost: with billions of parameters, \(H\) can be neither stored nor inverted. That
+            single obstacle shapes modern optimizer design, whether through first-order methods
+            that mimic curvature cheaply (Adam's per-coordinate operation) or through structured
+            approximations of \(H\) itself (K-FAC, Shampoo). One Taylor expansion,
+            truncated at different orders under a compute budget, spans essentially the whole
+            optimizer landscape.</p>
+
+          <h3>References</h3>
+
+          <ul>
+            <li>3Blue1Brown,
+              <a href="https://www.youtube.com/watch?v=3d6DsjIBzJ4">Taylor series | Chapter 11,
+              Essence of calculus</a> (YouTube).</li>
+            <li>M. D. Porter,
+              <a href="https://mdporter.github.io/SYS6018/lectures/taylor-expansion.pdf">Optimization
+              with Taylor Expansions: Gradient Descent, Newton's Method, XGBoost</a>
+              (SYS 6018 lecture notes, University of Virginia).</li>
+            <li>Cornell CS 4/5780,
+              <a href="https://www.cs.cornell.edu/courses/cs4780/2022sp/notes/LectureNotes11.html">Lecture 11:
+              Gradient Descent (and Beyond)</a> (Spring 2022).</li>
+          </ul>
+        </div>
+
+        <a class="back-link" href="../blog.html">&larr; Back to blog</a>
+      </div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Blog — Xiaolong Huang</title>
+    <meta name="author" content="Xiaolong Huang">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <link rel="icon" type="image/png" href="images/h-favicon-32.png">
+  </head>
+
+  <body>
+    <div class="container">
+
+      <nav>
+        <a class="brand" href="index.html">Xiaolong Huang</a>
+        <div class="navlinks">
+          <a href="index.html">Home</a>
+          <a href="index.html#papers">Papers</a>
+          <a href="blog.html" class="active">Blog</a>
+          <!-- <a href="beyond-research.html">Beyond Research</a> -->
+        </div>
+      </nav>
+
+      <div class="page">
+
+        <!-- sub-tabs -->
+        <div class="subtabs">
+          <button class="subtab active" data-panel="notes">Notes</button>
+          <button class="subtab" data-panel="thoughts">Thoughts</button>
+        </div>
+
+        <!-- ===== Study Notes (default) ===== -->
+        <div class="panel" data-panel="notes">
+
+          <a class="post" href="posts/interesting-papers-jepa.html">
+            <span class="post-meta">Xiaolong Huang - 6/3/26</span>
+            <span class="post-title">Interesting Papers: JEPA Series</span>
+          </a>
+
+          <a class="post" href="posts/taylor-series-deep-learning.html">
+            <span class="post-meta">Xiaolong Huang - 4/6/26</span>
+            <span class="post-title">Taylor series and optimization</span>
+          </a>
+
+        </div>
+
+        <!-- ===== Thoughts ===== -->
+        <div class="panel" data-panel="thoughts" hidden>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script>
+      document.querySelectorAll('.subtab').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var target = btn.dataset.panel;
+          document.querySelectorAll('.subtab').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+          });
+          document.querySelectorAll('.panel').forEach(function (p) {
+            p.hidden = p.dataset.panel !== target;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
