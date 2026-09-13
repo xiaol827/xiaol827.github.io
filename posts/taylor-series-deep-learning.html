@@ -34,12 +34,12 @@
 
       <div class="page">
         <div class="post-header">
-          <span class="post-meta">Xiaolong Huang - 4/6/26</span>
+          <span class="post-meta">Xiaolong Huang</span>
           <h1 class="post-title">Taylor series and optimization</h1>
         </div>
 
         <div class="post-body">
-          <p class="lead">Nearly every optimizer we use in deep learning, from plain SGD to Newton-style methods, is built on the same idea: construct a local polynomial approximation of the loss and derive an update from that approximation. This note reviews Taylor series and how it connects to optimization. </p>
+          <p class="lead">Nearly every optimizer we use in deep learning, from plain SGD to Newton-style methods, is built on the same idea: construct a local polynomial approximation of the loss and derive an update from that approximation. </p>
 
           <h3>1. The Taylor series: Approximating a function with a polynomial</h3>
 
@@ -55,12 +55,6 @@
 
           <p>where the remainder \(R_n(x)\) collects everything the first \(n\) terms miss.
             Each extra term adds one more piece of local structure.</p>
-
-          <figure>
-            <img src="../images/taylor-orders.png"
-                 alt="A curve with its zeroth-order (constant), first-order (tangent line) and second-order (quadratic) Taylor approximations at a point a">
-            <figcaption>A simple illustration of Taylor approximations (this is drawn by opus4.8).</figcaption>
-          </figure>
 
           <p>Where do the coefficients \(\frac{f^{(k)}(a)}{k!}\) come from? Let's start with a polynomial centered at
           \(x=a\):</p>
@@ -189,6 +183,12 @@
           <p>which gives the Newton update:</p>
 
           \[ \theta_{t+1} = \theta_t - H^{-1}\nabla L(\theta_t). \]
+
+          <figure>
+            <img src="../images/loss_approximation.png"
+                 <!-- alt="A curve with its zeroth-order (constant), first-order (tangent line) and second-order (quadratic) Taylor approximations at a point a">
+            <figcaption>A simple illustration of Taylor approximations (this is drawn by opus4.8).</figcaption> -->
+          </figure>
 
           <p>The contrast with SGD is sharp. Because the quadratic model has a minimum, Newton's
             method needs no external step size: the curvature sets both the direction and the
