@@ -11,7 +11,7 @@
   'use strict';
 
   // ---- config -------------------------------------------------
-  var SRCS = ['images/selfie.jpg', 'images/selfie2.jpg']; // add more if you like
+  var SRCS = ['images/selfie.PNG', 'images/selfie_ani.png']; // add more if you like
   var HOLD = 5000;    // ms between transitions
   var DUR  = 6000;    // ms a transition takes
   var SPARKS_PER_FRAME = 14;
