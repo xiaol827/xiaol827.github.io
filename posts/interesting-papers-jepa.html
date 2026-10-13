@@ -39,16 +39,15 @@
         </div>
 
         <div class="post-body">
-          <p class="lead">I am reading interesting papers from the JEPA line of work and briefly summarize some of them here in order: the
+          <p class="lead">I read some interesting papers from the JEPA line of work and briefly summarize some of them here in order: the
             original paper that defined the architecture, the image and video instantiations
             (I-JEPA, V-JEPA, V-JEPA 2), and the elegant method for preventing representation collapse (LeJEPA), 
             and later some world model applications (LeWorldModel, AdaJEPA).</p>
 
           <h3>1. <a href="https://openreview.net/pdf?id=BZ5a1r-kVsf">The origin: JEPA as an energy-based architecture</a></h3>
 
-          <p>The Joint-Embedding Predictive Architecture was introduced in LeCun's position
-            paper as the centerpiece of a proposed path toward autonomous machine
-            intelligence. The setup: two related inputs, a context \(x\) and a target \(y\),
+          <p>The Joint-Embedding Predictive Architecture (JEPA) was introduced in LeCun’s position paper on autonomous machine intelligence. 
+            JEPA's setup: two related inputs, a context \(x\) and a target \(y\),
             are encoded separately into \(s_x = \mathrm{Enc}(x)\) and
             \(s_y = \mathrm{Enc}(y)\). A predictor then tries to reach \(s_y\) from \(s_x\),
             aided by a latent variable \(z\), producing
